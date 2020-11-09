@@ -113,7 +113,7 @@ class MySQL extends AbstractAdapter
 
         foreach ($joinConditions as $joinAliasInfos) {
             foreach ($joinAliasInfos as $tableAlias => $joinInfos) {
-                $query .= ' ' . $joinInfos['joinType'] . ' ' . _DB_PREFIX_ . $joinInfos['tableName'] . ' ' .
+                $query .= ' ' . $joinInfos['joinType'] . ' ' . ( (strripos($joinInfos['tableName'],'select')) ? '' : _DB_PREFIX_ ). $joinInfos['tableName'] . ' ' .
                        $tableAlias . ' ON ' . $joinInfos['joinCondition'];
             }
         }
@@ -297,6 +297,23 @@ class MySQL extends AbstractAdapter
                 'fieldAlias' => 'sales',
                 'joinCondition' => '(psales.id_product = p.id_product)',
                 'joinType' => self::LEFT_JOIN,
+            ],
+            'discount' => [
+                'tableName' => "
+                    (SELECT id_product, reduction
+                        FROM "._DB_PREFIX_."specific_price WHERE (id_product,reduction) IN
+                                            ( SELECT id_product, MAX(reduction)
+                                              FROM "._DB_PREFIX_."specific_price
+                                              where now() between `from` and `to`
+                                              GROUP BY id_product
+                                            ) GROUP BY id_product )                
+                ",
+                'tableAlias' => 'spec',
+                'fieldName' => 'reduction',
+                'fieldAlias' => 'discount',
+                'joinCondition' => 'p.id_product = spec.id_product',
+                'joinType' => self::LEFT_JOIN,
+                'withoutPrefixInJoinCondition' => true,
             ],
         ];
 
