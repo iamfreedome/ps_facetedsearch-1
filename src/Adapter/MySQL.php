@@ -299,21 +299,18 @@ class MySQL extends AbstractAdapter
                 'joinType' => self::LEFT_JOIN,
             ],
             'discount' => [
-                'tableName' => "
-                    (SELECT id_product, reduction
-                        FROM "._DB_PREFIX_."specific_price WHERE (id_product,reduction) IN
-                                            ( SELECT id_product, MAX(reduction)
-                                              FROM "._DB_PREFIX_."specific_price
-                                              where now() between `from` and `to`
-                                              GROUP BY id_product
-                                            ) GROUP BY id_product )                
-                ",
+                'tableName' => "specific_price",
                 'tableAlias' => 'spec',
                 'fieldName' => 'reduction',
                 'fieldAlias' => 'discount',
-                'joinCondition' => 'p.id_product = spec.id_product',
+                'joinCondition' => "
+                    (p.id_product = spec.id_product)
+                        AND ((now() between `from` and `to`)
+                        OR (`from` = '0000-00-00 00:00:00' AND `to` = '0000-00-00 00:00:00')
+                        OR (`from` = '0000-00-00 00:00:00' AND now() <= `to`)
+                        OR (`from` <= now() AND `to` = '0000-00-00 00:00:00'))
+                ",
                 'joinType' => self::LEFT_JOIN,
-                'withoutPrefixInJoinCondition' => true,
             ],
         ];
 
