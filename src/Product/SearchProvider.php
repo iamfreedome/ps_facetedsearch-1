@@ -89,7 +89,7 @@ class SearchProvider implements FacetsRendererInterface, ProductSearchProviderIn
                 $translator->trans('Relevance', [], 'Modules.Facetedsearch.Shop')
             ),
              $sortDiscountDesc->setLabel(
-                $translator->trans('Discount', [], 'Modules.Facetedsearch.Sort')
+                $translator->trans('Discount', [], 'Modules.Facetedsearch.Sort') 
             ),
             $sortPriceAsc->setLabel(
                 $translator->trans('Price, low to high', [], 'Shop.Theme.Catalog')
