@@ -170,7 +170,7 @@ class Block
             'SELECT data FROM ' . _DB_PREFIX_ . 'layered_filter_block WHERE hash="' . pSQL($filterHash) . '"'
         );
 
-        if (!empty($row)) {
+        if (!empty($row) && strlen(current($row)) <65535 ) {
             return unserialize(current($row));
         }
 
