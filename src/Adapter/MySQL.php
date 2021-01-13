@@ -91,12 +91,12 @@ class MySQL extends AbstractAdapter
      *
      * @return string
      */
-    public function getQuery()
+    public function getQuery( $needOptimize = false )
     {
         $filterToTableMapping = $this->getFieldMapping();
         $orderField = $this->computeOrderByField($filterToTableMapping);
 
-        if ($this->getInitialPopulation() === null) {
+        if ($this->getInitialPopulation() === null || $needOptimize) {
             $referenceTable = _DB_PREFIX_ . 'product';
         } else {
             $referenceTable = '(' . $this->getInitialPopulation()->getQuery() . ')';
@@ -134,6 +134,9 @@ class MySQL extends AbstractAdapter
             $query .= ' LIMIT ' . $this->offset . ', ' . $this->limit;
         }
 
+        if ($needOptimize) {
+            $query = $this->optimizeQuery( $needOptimize, $query );
+        }
         return $query;
     }
 
@@ -732,10 +735,22 @@ class MySQL extends AbstractAdapter
     public function valueCount($fieldName = null)
     {
         $this->resetGroupBy();
-        if ($fieldName !== null) {
+        if ( $fieldName !== null ) {
             $this->addGroupBy($fieldName);
             $this->addSelectField($fieldName);
+            $this->addSelectField('COUNT(1) c');
+            $this->setLimit(null);
+            $this->setOrderField('');
+            $this->copyOperationsFilters();
+
+            return $this->getDatabase()->executeS( $this->getQuery( $fieldName ) );
         }
+        /* Use this construction if added new $fieldname used valueCount
+        if
+        ($fieldName !== null) {
+            $this->addGroupBy($fieldName);
+            $this->addSelectField($fieldName);
+        }*/
 
         $this->addSelectField('COUNT(DISTINCT p.id_product) c');
         $this->setLimit(null);
