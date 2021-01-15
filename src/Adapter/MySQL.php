@@ -730,6 +730,30 @@ class MySQL extends AbstractAdapter
     }
 
     /**
+     *
+     */
+    public function optimizeQuery($fieldName, $sql)
+    {
+        switch ( $fieldName ) {
+            case 'id_attribute':
+                $reduce_array = [
+                    'SUM(sa.quantity) as quantity,',
+                    'p.condition, p.weight, p.price,',
+                    'psales.quantity as sales,',
+                    'LEFT JOIN ps_stock_available sa ON (p.id_product = sa.id_product AND IFNULL(pac.id_product_attribute, 0) = sa.id_product_attribute AND sa.id_shop = 1  AND sa.id_shop_group = 0 )',
+                    'LEFT JOIN ps_product_sale psales ON (psales.id_product = p.id_product)'
+                ];
+                foreach ($reduce_array as $reduceString) {
+                    $sql = str_ireplace($reduceString,'', $sql);
+                }
+                $sql = str_ireplace('COUNT(1)','1', $sql);
+
+                break;
+        }
+        return $sql;
+
+    }
+    /**
      * {@inheritdoc}
      */
     public function valueCount($fieldName = null)
