@@ -96,7 +96,7 @@ class MySQL extends AbstractAdapter
         $filterToTableMapping = $this->getFieldMapping();
         $orderField = $this->computeOrderByField($filterToTableMapping);
 
-        if ($this->getInitialPopulation() === null || $needOptimize) {
+        if ($this->getInitialPopulation() === null) {
             $referenceTable = _DB_PREFIX_ . 'product';
         } else {
             $referenceTable = '(' . $this->getInitialPopulation()->getQuery() . ')';
